@@ -4,7 +4,7 @@
 ## Short Code Example
 
 ```
-	[u2s]http://example.com[/u2s]
+	[u2s]http://example.com/[/u2s]
 ```
 
 ## License
