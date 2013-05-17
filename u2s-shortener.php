@@ -14,7 +14,6 @@
 
 		public function __construct(){
 			$this->_api = 'http://u2s.ir/?api=1&return_text=1';
-
 			
 			if ( function_exists( 'wpme_shortlink_header' ) )
 			{
@@ -91,7 +90,20 @@
 
 			if ( $link != false )
 			{
-				/** @TODO: Check if it's a valid url */
+				$args = array( 'return_long' => '1', 'url' => urlencode( $link ));
+				$arguments[] = '';
+				
+				foreach($args as $each=>$value){
+					$arguments[] = $each.'='.$value;
+				}
+
+				$api_return = '';
+
+				$api_response = wp_remote_get($this->_api . (implode('&',$arguments)));
+
+				// check if the shortlink realy points to this post
+				if ( is_array( $response ) && $response['status_code'] == 200 && $api_response['body'] == $permalink )
+					return false;
 
 				// The expanded URLs don't match, so we can delete and regenerate
 				delete_post_meta( $post_id, 'short_url' );
@@ -152,20 +164,13 @@
 
 			$api_response = wp_remote_get($this->_api . (implode('&',$arguments)));
 			
-			if(!is_wp_error($api_response)){
-				if (intval($api_response['response']['code']) == 200) {	
-					$response = $api_response['body'];
-					if(strlen($response) > 2){
+			if ( !is_wp_error($api_response) && is_array( $response ) && $response['status_code'] == 200 ) {
+				$response = $api_response['body'];
+					if ( strlen($response) > 2 )
 						$api_return = $response;
-					} else {
-						$api_return =  'ERROR';
-					}
-				} else {
-					$api_return =  'ERROR';
-				}
 			} else {
 				$api_return =  'ERROR';
-			}			
+			}		
 
 			return $api_return;
 		}
